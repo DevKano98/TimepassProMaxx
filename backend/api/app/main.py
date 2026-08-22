@@ -22,6 +22,7 @@ app = FastAPI(title="CivicGuard API", version="1.0.0")
 _cors_origins = {
     settings.FRONTEND_ORIGIN,
     settings.FIELD_APP_ORIGIN,
+    "https://timepass-pro-maxx.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
@@ -30,11 +31,13 @@ _cors_origins = {
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(_cors_origins),
+    allow_origins=[origin for origin in _cors_origins if origin],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 @app.get("/health")
