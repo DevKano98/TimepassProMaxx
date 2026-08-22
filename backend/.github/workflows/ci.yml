@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: civicguard_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/civicguard_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/civicguard_test
+      # Dummy values for every required setting so app.config.Settings can
+      # instantiate in CI without real third-party credentials.
+      CLOUDINARY_CLOUD_NAME: test-cloud
+      CLOUDINARY_API_KEY: test-key
+      CLOUDINARY_API_SECRET: test-secret
+      RESEND_API_KEY: test-resend-key
+      FIREBASE_SERVICE_ACCOUNT_JSON: '{"type": "service_account"}'
+      VAPID_PUBLIC_KEY: test-vapid-public
+      VAPID_PRIVATE_KEY: test-vapid-private
+      VAPID_ADMIN_EMAIL: test@example.com
+      HUGGINGFACE_API_TOKEN: test-hf-token
+      GROQ_API_KEY: test-groq-key
+      ORS_API_KEY: test-ors-key
+      JWT_SECRET_KEY: test-jwt-secret
+      INTERNAL_API_KEY: test-internal-key
+      FRONTEND_ORIGIN: http://localhost:3000
+      FIELD_APP_ORIGIN: http://localhost:3001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install api/ dependencies
+        run: pip install -r api/requirements.txt
+
+      - name: Install alembic (for migration check)
+        run: pip install alembic
+
+      - name: Enable PostGIS extension on test DB
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -d civicguard_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d civicguard_test -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+      - name: Verify migrations apply cleanly
+        run: alembic upgrade head --sql > /dev/null
+
+      - name: Apply migrations to test DB
+        run: alembic upgrade head
+
+      - name: Run pytest
+        run: pytest tests/ -v

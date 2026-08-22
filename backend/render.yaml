@@ -1,0 +1,70 @@
+services:
+  - type: web
+    name: civicguard-api
+    env: docker
+    plan: free
+    dockerfilePath: api/Dockerfile
+    dockerContext: api
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_ADMIN_EMAIL
+        sync: false
+      - key: HUGGINGFACE_API_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        sync: false
+      - key: NOMINATIM_URL
+        sync: false
+      - key: ORS_API_KEY
+        sync: false
+      - key: OPEN_METEO_URL
+        sync: false
+      - key: ANON_REPORT_DAILY_LIMIT
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: JWT_ALGORITHM
+        sync: false
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        sync: false
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        sync: false
+      - key: INTERNAL_API_KEY
+        sync: false
+      - key: ML_SERVICE_URL
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: FIELD_APP_ORIGIN
+        sync: false
+
+  - type: web
+    name: civicguard-ml
+    env: docker
+    plan: free
+    dockerfilePath: ml-service/Dockerfile
+    dockerContext: ml-service
+    healthCheckPath: /health
+    envVars:
+      - key: YOLO_WEIGHTS_PATH
+        sync: false
+      - key: CONFIDENCE_THRESHOLD
+        sync: false

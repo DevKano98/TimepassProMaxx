@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+ultralytics
+pillow
+httpx
+python-dotenv
+
+# Added beyond the spec's exact list: config.py uses a Pydantic Settings
+# class (matching api/'s pattern) to load env vars, which requires this.
+pydantic-settings

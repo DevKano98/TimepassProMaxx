@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.65"
+        android:scaleY="0.65"
+        android:translateX="18.9"
+        android:translateY="18.9">
+        <!-- Shield Base -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54,12 L24,24 V52 C24,72 36.8,89.6 54,96 C71.2,89.6 84,72 84,52 V24 L54,12 Z" />
+        <!-- Shield Inner Accent / Guard Shield -->
+        <path
+            android:fillColor="#0052FF"
+            android:pathData="M54,20 L30,30 V52 C30,68 40.2,82.4 54,88 C67.8,82.4 78,68 78,52 V30 L54,20 Z" />
+        <!-- Hazard Pin Symbol inside -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54,34 C48.48,34 44,38.48 44,44 C44,51.5 54,64 54,64 C54,64 64,51.5 64,44 C64,38.48 59.52,34 54,34 Z" />
+        <path
+            android:fillColor="#0052FF"
+            android:pathData="M54,41 A3,3 0 1,0 54,47 A3,3 0 1,0 54,41 Z" />
+    </group>
+</vector>

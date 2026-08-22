@@ -1,0 +1,14 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op - deployment is handled by Render
+        run: |
+          echo "Deployment is handled by Render's GitHub integration (auto-deploy on push to main)."
+          echo "Configure auto-deploy for both civicguard-api and civicguard-ml in Render's dashboard - not here."

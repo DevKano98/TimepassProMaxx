@@ -1,0 +1,26 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+pydantic
+pydantic-settings
+psycopg2-binary
+geoalchemy2
+cloudinary
+resend
+firebase-admin
+pywebpush
+python-jose[cryptography]
+passlib[bcrypt]
+httpx
+python-dotenv
+pytest
+pytest-asyncio
+
+# Additional packages required to implement functionality described elsewhere
+# in this spec (section 3's services/ descriptions) that the base "exact
+# packages" list above does not cover on its own:
+Shapely            # required by geoalchemy2 for Python-side geometry handling
+opencv-python-headless   # blur_service.py: Gaussian blur on detected regions
+pillow             # blur_service.py: image decoding before OpenCV processing
+numpy              # blur_service.py: array conversion between PIL and OpenCV

@@ -1,0 +1,17 @@
+.env
+api/.env
+ml-service/.env
+api/firebase_credentials.json
+firebase_credentials.json
+__pycache__/
+
+*.pyc
+ml-service/models/*.pt
+ml-service/runs/
+runs/
+.pytest_cache/
+
+.venv/
+venv/
+*.egg-info/
+.DS_Store
