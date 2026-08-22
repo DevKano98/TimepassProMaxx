@@ -79,24 +79,3 @@ services:
         value: "0.25"
       - key: ALLOW_DUMMY_MODEL
         value: "false"
-
-  # ---------------------------------------------------------
-  # 3. CivicGuard React Web App (Static Site)
-  # ---------------------------------------------------------
-  - type: web
-    name: civicguard-frontend
-    env: static
-    plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: civicguard-api
-          property: host
