@@ -14,9 +14,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
+COPY models ./models
 
-# best.pt is placed here at deploy time - not committed to git (see .gitignore).
-RUN mkdir -p /app/models
 
 # Render sets $PORT at runtime - never hardcode 8000/8001 in the CMD.
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}"]

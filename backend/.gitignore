@@ -7,7 +7,9 @@ __pycache__/
 
 *.pyc
 ml-service/models/*.pt
+!ml-service/models/best.pt
 ml-service/runs/
+
 runs/
 .pytest_cache/
 

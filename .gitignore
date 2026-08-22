@@ -29,7 +29,9 @@ build/
 
 # ML weights & training artifacts
 backend/ml-service/models/*.pt
+!backend/ml-service/models/best.pt
 backend/ml-service/runs/
+
 backend/runs/
 runs/
 
