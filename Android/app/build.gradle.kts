@@ -22,9 +22,10 @@ android {
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-    buildConfigField("String", "API_BASE_URL", "\"https://api.civicguard.gov\"")
+    buildConfigField("String", "API_BASE_URL", "\"https://civicguard-api.onrender.com\"")
     buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"civicguard-media\"")
     buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"civicguard_reports\"")
+
   }
 
   signingConfigs {
