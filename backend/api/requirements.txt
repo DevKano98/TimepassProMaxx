@@ -4,6 +4,8 @@ sqlalchemy
 alembic
 pydantic
 pydantic-settings
+email-validator
+
 psycopg2-binary
 geoalchemy2
 cloudinary
