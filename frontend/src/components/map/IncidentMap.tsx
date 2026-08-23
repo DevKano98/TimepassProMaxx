@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Incident } from '../../types';
 import { BadgePill } from '../common/BadgePill';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Eye } from 'lucide-react';
+import { ArrowRight, Crosshair, Navigation } from 'lucide-react';
 
 // Custom SVG icon generator with exact severity color tokens
 function createCustomPin(severity: string, isSelected = false) {
@@ -30,10 +30,28 @@ function createCustomPin(severity: string, isSelected = false) {
   });
 }
 
+// User current location pulsing pin
+function createUserLocationPin() {
+  const svg = `
+    <div style="position: relative; width: 24px; height: 24px;">
+      <div style="position: absolute; width: 24px; height: 24px; border-radius: 50%; background: rgba(59, 130, 246, 0.4); animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+      <div style="position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 3px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+    </div>
+  `;
+
+  return L.divIcon({
+    html: svg,
+    className: 'user-location-marker',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+  });
+}
+
 function RecenterMap({ lat, lng, zoom }: { lat: number; lng: number; zoom?: number }) {
   const map = useMap();
   useEffect(() => {
-    map.setView([lat, lng], zoom || map.getZoom());
+    map.setView([lat, lng], zoom || map.getZoom(), { animate: true });
   }, [lat, lng, zoom, map]);
   return null;
 }
@@ -57,18 +75,65 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   height = '500px',
 }) => {
   const navigate = useNavigate();
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [targetCenter, setTargetCenter] = useState<[number, number] | null>(null);
 
-  // Find dynamic center if incidents exist
-  const mapCenter: [number, number] = selectedIncident
+  // Auto-detect real-time browser location on mount for all roles
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setUserLocation(coords);
+          if (incidents.length === 0 && !selectedIncident) {
+            setTargetCenter(coords);
+          }
+        },
+        (err) => {
+          console.log('Browser geolocation skipped or denied:', err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+  }, []);
+
+  const handleLocateMe = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setUserLocation(coords);
+          setTargetCenter(coords);
+        },
+        (err) => {
+          alert('Could not access your location: ' + err.message);
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+  };
+
+  // Find dynamic center if incidents exist or user location found
+  const initialMapCenter: [number, number] = selectedIncident
     ? [selectedIncident.location.lat, selectedIncident.location.lng]
     : incidents.length > 0
     ? [incidents[0].location.lat, incidents[0].location.lng]
-    : center;
+    : userLocation || center;
 
   return (
     <div style={{ height }} className="w-full relative rounded-xl overflow-hidden border border-hairline shadow-soft">
+      {/* Floating My Location Button */}
+      <button
+        onClick={handleLocateMe}
+        title="Center on my real-time location"
+        className="absolute top-3 right-3 z-[1000] bg-surface text-ink px-3 py-2 rounded-lg shadow-md border border-hairline flex items-center gap-1.5 text-xs font-semibold hover:bg-surface-soft active:scale-95 transition-all cursor-pointer"
+      >
+        <Crosshair className="w-4 h-4 text-primary animate-pulse" />
+        <span>My Location</span>
+      </button>
+
       <MapContainer
-        center={mapCenter}
+        center={initialMapCenter}
         zoom={zoom}
         scrollWheelZoom={true}
         className="w-full h-full"
@@ -78,12 +143,27 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {targetCenter && (
+          <RecenterMap lat={targetCenter[0]} lng={targetCenter[1]} zoom={15} />
+        )}
+
         {selectedIncident && (
           <RecenterMap
             lat={selectedIncident.location.lat}
             lng={selectedIncident.location.lng}
             zoom={15}
           />
+        )}
+
+        {/* User Real-Time Location Marker */}
+        {userLocation && (
+          <Marker position={userLocation} icon={createUserLocationPin()}>
+            <Popup>
+              <div className="text-center font-medium text-xs py-1">
+                📍 You are here (Live GPS)
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         {incidents.map((incident) => {
