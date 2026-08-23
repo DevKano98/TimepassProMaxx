@@ -146,10 +146,23 @@ def get_report(report_id: UUID, db: Session = Depends(get_db)) -> Report:
 
 @router.get("/api/my-reports", response_model=list[ReportDetailOut])
 def get_my_reports(
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    x_device_id: Optional[str] = Header(default=None, alias="X-Device-Id"),
     db: Session = Depends(get_db),
 ) -> list[Report]:
-    return db.query(Report).filter(Report.user_id == current_user.id).order_by(Report.created_at.desc()).all()
+    if current_user and x_device_id:
+        return (
+            db.query(Report)
+            .filter((Report.user_id == current_user.id) | (Report.device_id == x_device_id))
+            .order_by(Report.created_at.desc())
+            .all()
+        )
+    elif current_user:
+        return db.query(Report).filter(Report.user_id == current_user.id).order_by(Report.created_at.desc()).all()
+    elif x_device_id:
+        return db.query(Report).filter(Report.device_id == x_device_id).order_by(Report.created_at.desc()).all()
+    return []
+
 
 
 @router.post("/api/incidents/{incident_id}/confirm", response_model=IncidentOut)

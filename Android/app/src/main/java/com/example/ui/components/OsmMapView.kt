@@ -27,8 +27,8 @@ import org.osmdroid.events.MapEventsReceiver
 @Composable
 fun OsmMapView(
     modifier: Modifier = Modifier,
-    centerLat: Double = 37.7749,
-    centerLng: Double = -122.4194,
+    centerLat: Double = 19.21258,
+    centerLng: Double = 73.08346,
     zoomLevel: Double = 14.5,
     incidents: List<IncidentReportItem> = emptyList(),
     selectedIncidentId: String? = null,
@@ -128,12 +128,18 @@ fun OsmMapView(
                     icon = createUserLocationDrawable(context)
                 }
                 map.overlays.add(userMarker)
+
+                // Animate and center map to live GPS coordinates
+                if (centerLat != 0.0 && centerLng != 0.0) {
+                    map.controller.animateTo(GeoPoint(centerLat, centerLng))
+                }
             }
 
             map.invalidate()
         }
     )
 }
+
 
 private fun createMarkerDrawable(context: Context, color: Int, symbol: String, isSelected: Boolean = false): Drawable {
     val sizePx = if (isSelected) 84 else 68
