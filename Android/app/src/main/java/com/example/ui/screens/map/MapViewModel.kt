@@ -31,14 +31,14 @@ class MapViewModel(
         loadNearbyIncidents(37.7749, -122.4194)
     }
 
-    fun loadNearbyIncidents(lat: Double, lng: Double) {
+    fun loadNearbyIncidents(lat: Double, lng: Double, radiusMeters: Double = 50000.0) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 centerLat = lat,
                 centerLng = lng
             )
-            val result = repository.getNearbyReports(lat, lng)
+            val result = repository.getNearbyReports(lat, lng, radiusMeters)
             result.onSuccess { list ->
                 _uiState.value = _uiState.value.copy(
                     incidents = list,
@@ -50,6 +50,7 @@ class MapViewModel(
             }
         }
     }
+
 
     fun onCategoryFilterSelected(category: String?) {
         _uiState.value = _uiState.value.copy(

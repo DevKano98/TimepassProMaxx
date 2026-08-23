@@ -72,6 +72,29 @@ fun MapScreen(
     onNavigateToIncidentDetail: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val fusedClient = androidx.compose.runtime.remember { com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(context) }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            try {
+                fusedClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { loc ->
+                        if (loc != null) {
+                            viewModel.loadNearbyIncidents(loc.latitude, loc.longitude, 50000.0)
+                        } else {
+                            fusedClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.loadNearbyIncidents(lastLoc.latitude, lastLoc.longitude, 50000.0)
+                                }
+                            }
+                        }
+                    }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -112,7 +135,31 @@ fun MapScreen(
                 }
             )
 
+            // Live Location Re-center Floating Button
+            IconButton(
+                onClick = {
+                    try {
+                        fusedClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                            .addOnSuccessListener { loc ->
+                                if (loc != null) {
+                                    viewModel.loadNearbyIncidents(loc.latitude, loc.longitude, 50000.0)
+                                }
+                            }
+                    } catch (e: Exception) {
+                        // Ignore
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 80.dp)
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.surface, CircleShape)
+            ) {
+                Icon(Icons.Default.LocationOn, contentDescription = "Center on My Location", tint = CivicBlue)
+            }
+
             // Top Control Overlay: Header & Filter Chips
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
