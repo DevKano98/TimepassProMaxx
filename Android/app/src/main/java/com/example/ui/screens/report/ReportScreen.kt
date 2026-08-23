@@ -142,11 +142,18 @@ fun ReportScreen(
         if (fineGranted || coarseGranted) {
             try {
                 val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
-                    if (loc != null) {
-                        viewModel.onLocationUpdated(loc.latitude, loc.longitude)
+                fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { loc ->
+                        if (loc != null) {
+                            viewModel.onLocationUpdated(loc.latitude, loc.longitude)
+                        } else {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.onLocationUpdated(lastLoc.latitude, lastLoc.longitude)
+                                }
+                            }
+                        }
                     }
-                }
             } catch (e: SecurityException) {
                 // Ignore
             }
@@ -158,11 +165,18 @@ fun ReportScreen(
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             try {
                 val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-                fusedClient.lastLocation.addOnSuccessListener { loc ->
-                    if (loc != null) {
-                        viewModel.onLocationUpdated(loc.latitude, loc.longitude)
+                fusedClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { loc ->
+                        if (loc != null) {
+                            viewModel.onLocationUpdated(loc.latitude, loc.longitude)
+                        } else {
+                            fusedClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.onLocationUpdated(lastLoc.latitude, lastLoc.longitude)
+                                }
+                            }
+                        }
                     }
-                }
             } catch (e: Exception) {
                 // Ignore
             }
@@ -172,6 +186,7 @@ fun ReportScreen(
             )
         }
     }
+
 
     // Handle navigation events
     LaunchedEffect(Unit) {

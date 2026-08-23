@@ -29,19 +29,30 @@ class HazardDetectionResult(TypedDict):
     status: str
 
 
+def _get_ml_service_url() -> str:
+    raw = (settings.ML_SERVICE_URL or "https://civicguard-ml.onrender.com").strip().rstrip("/")
+    if not raw.startswith("http://") and not raw.startswith("https://"):
+        if ":" in raw:
+            raw = f"http://{raw}"
+        else:
+            raw = f"https://{raw}"
+    return raw
+
+
 def detect_hazard(image_url: str) -> HazardDetectionResult:
     """
     Calls ml-service's POST /detect with the report image and returns the
     single highest-confidence detection, or a pending_ai_review fallback if
     the service can't be reached in time or returns no detections.
     """
-    url = f"{settings.ML_SERVICE_URL}/detect"
+    url = f"{_get_ml_service_url()}/detect"
     try:
         response = httpx.post(
             url,
             json={"image_url": image_url},
             timeout=settings.ML_SERVICE_TIMEOUT_SECONDS,
         )
+
         response.raise_for_status()
         payload = response.json()
         detections: list[Detection] = payload.get("detections", [])
