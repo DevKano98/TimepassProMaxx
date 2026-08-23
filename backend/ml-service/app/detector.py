@@ -72,9 +72,12 @@ class HazardDetector:
 
 
     def _download_image(self, image_url: str) -> Image.Image:
-        response = httpx.get(image_url, timeout=15.0)
+        response = httpx.get(image_url, timeout=20.0)
         response.raise_for_status()
-        return Image.open(io.BytesIO(response.content)).convert("RGB")
+        img = Image.open(io.BytesIO(response.content)).convert("RGB")
+        # Downsample large phone photos for fast, memory-safe inference on CPU
+        img.thumbnail((640, 640), Image.Resampling.LANCZOS)
+        return img
 
     def detect(self, image_url: str) -> list[Detection]:
         if self._is_dummy or self._model is None:
@@ -91,8 +94,11 @@ class HazardDetector:
         results = self._model.predict(
             source=image,
             conf=self._confidence_threshold,
+            imgsz=640,
+            device="cpu",
             verbose=False,
         )
+
 
         detections: list[Detection] = []
         if not results:

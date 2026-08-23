@@ -68,7 +68,8 @@ class Settings(BaseSettings):
 
     # --- ml-service ---
     ML_SERVICE_URL: str = "http://localhost:8001"
-    ML_SERVICE_TIMEOUT_SECONDS: float = 15.0
+    ML_SERVICE_TIMEOUT_SECONDS: float = 45.0
+
 
     # --- CORS ---
     FRONTEND_ORIGIN: str = "http://localhost:5173"
