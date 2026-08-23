@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578939682021",
+    "project_id": "civicguard-a5c48",
+    "storage_bucket": "civicguard-a5c48.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578939682021:android:be989a01004ea65bbfe80c",
+        "android_client_info": {
+          "package_name": "com.aistudio.civicguard.cgxrqp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaRSdFp4TFc1NYvYrc_8xxyLhNTmWtuGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
