@@ -159,6 +159,11 @@ class IncidentAdminOut(BaseModel):
     report_count: int
     created_at: datetime
     resolved_at: Optional[datetime] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+
 
 
 class IncidentAssign(BaseModel):

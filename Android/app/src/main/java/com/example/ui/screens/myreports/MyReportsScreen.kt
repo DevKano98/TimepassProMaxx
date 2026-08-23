@@ -73,12 +73,13 @@ fun MyReportsScreen(
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
-    // If not logged in, prompt OTP login first (§4)
+    // Load reports when authenticated
     LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn) {
-            onNavigateToLogin()
+        if (isLoggedIn) {
+            viewModel.loadMyReports()
         }
     }
+
 
     Scaffold(
         topBar = {

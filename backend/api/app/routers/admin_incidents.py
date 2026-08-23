@@ -23,6 +23,51 @@ def _get_incident_or_404(db: Session, incident_id: UUID) -> Incident:
     return incident
 
 
+from geoalchemy2.shape import to_shape
+from app.models import Incident, Report, Ticket, User
+
+
+def _serialize_incident(inc: Incident, db: Session) -> IncidentAdminOut:
+    lat = None
+    lng = None
+    if inc.location is not None:
+        try:
+            pt = to_shape(inc.location)
+            lat = pt.y
+            lng = pt.x
+        except Exception:
+            pass
+
+    latest_report = (
+        db.query(Report)
+        .filter(Report.incident_id == inc.id)
+        .order_by(Report.created_at.desc())
+        .first()
+    )
+
+    image_url = latest_report.image_url if latest_report else None
+    description = latest_report.description if latest_report else None
+
+    return IncidentAdminOut(
+        id=inc.id,
+        title=inc.title or f"{inc.category.replace('_', ' ').title()} at {inc.ward or 'Location'}",
+        category=inc.category,
+        status=inc.status,
+        severity=inc.severity or "medium",
+        priority_score=inc.priority_score or (round(inc.confidence * 100, 1) if inc.confidence else 85.0),
+        confidence=inc.confidence or 0.85,
+        ward=inc.ward or "Central Zone",
+        department_id=inc.department_id,
+        report_count=inc.report_count,
+        created_at=inc.created_at,
+        resolved_at=inc.resolved_at,
+        latitude=lat,
+        longitude=lng,
+        image_url=image_url,
+        description=description,
+    )
+
+
 @router.get("", response_model=list[IncidentAdminOut])
 def list_incidents(
     status_filter: Optional[str] = Query(default=None, alias="status"),
@@ -34,7 +79,7 @@ def list_incidents(
     date_to: Optional[date] = Query(default=None),
     current_user: User = Depends(require_role(*_OFFICIAL_ROLES)),
     db: Session = Depends(get_db),
-) -> list[Incident]:
+) -> list[IncidentAdminOut]:
     query = db.query(Incident)
 
     if status_filter:
@@ -52,7 +97,8 @@ def list_incidents(
     if date_to:
         query = query.filter(Incident.created_at <= date_to)
 
-    return query.order_by(Incident.created_at.desc()).all()
+    incidents = query.order_by(Incident.created_at.desc()).all()
+    return [_serialize_incident(inc, db) for inc in incidents]
 
 
 @router.get("/{incident_id}", response_model=IncidentAdminOut)
@@ -60,8 +106,10 @@ def get_incident(
     incident_id: UUID,
     current_user: User = Depends(require_role(*_OFFICIAL_ROLES)),
     db: Session = Depends(get_db),
-) -> Incident:
-    return _get_incident_or_404(db, incident_id)
+) -> IncidentAdminOut:
+    inc = _get_incident_or_404(db, incident_id)
+    return _serialize_incident(inc, db)
+
 
 
 @router.post("/{incident_id}/verify", response_model=IncidentAdminOut)
