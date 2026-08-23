@@ -6,7 +6,17 @@ CLASSES must stay exactly ["pothole", "flooded_road", "garbage_pile",
 "damaged_road"] in this order (section 1) - it must match the index order the
 model was trained with. Do not reorder or rename these.
 """
+import gc
 import io
+
+try:
+    import torch
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
+    torch.set_grad_enabled(False)
+except Exception:
+    torch = None
+
 try:
     from typing_extensions import TypedDict
 except ImportError:
@@ -69,14 +79,13 @@ class HazardDetector:
             self._model = None
             self._is_dummy = True
 
-
-
     def _download_image(self, image_url: str) -> Image.Image:
         response = httpx.get(image_url, timeout=20.0)
         response.raise_for_status()
         img = Image.open(io.BytesIO(response.content)).convert("RGB")
-        # Downsample large phone photos for fast, memory-safe inference on CPU
-        img.thumbnail((640, 640), Image.Resampling.LANCZOS)
+        # Downsample large phone photos to 480px thumbnail for fast, memory-safe inference on 512MB CPU
+        img.thumbnail((480, 480), Image.Resampling.LANCZOS)
+        del response
         return img
 
     def detect(self, image_url: str) -> list[Detection]:
@@ -90,39 +99,55 @@ class HazardDetector:
                 }
             ]
 
-        image = self._download_image(image_url)
-        results = self._model.predict(
-            source=image,
-            conf=self._confidence_threshold,
-            imgsz=640,
-            device="cpu",
-            verbose=False,
-        )
-
-
         detections: list[Detection] = []
-        if not results:
-            return detections
+        try:
+            image = self._download_image(image_url)
 
-        result = results[0]
-        if result.boxes is None:
-            return detections
+            if torch is not None:
+                with torch.inference_mode():
+                    results = self._model.predict(
+                        source=image,
+                        conf=self._confidence_threshold,
+                        imgsz=480,
+                        device="cpu",
+                        verbose=False,
+                        max_det=5,
+                    )
+            else:
+                results = self._model.predict(
+                    source=image,
+                    conf=self._confidence_threshold,
+                    imgsz=480,
+                    device="cpu",
+                    verbose=False,
+                    max_det=5,
+                )
 
-        for box in result.boxes:
-            class_index = int(box.cls.item())
-            confidence = float(box.conf.item())
-            xyxy = box.xyxy[0].tolist()
+            if results and results[0].boxes is not None:
+                result = results[0]
+                for box in result.boxes:
+                    class_index = int(box.cls.item())
+                    confidence = float(box.conf.item())
+                    xyxy = box.xyxy[0].tolist()
 
-            if class_index < 0 or class_index >= len(CLASSES):
-                logger.warning("Model returned out-of-range class index %d; skipping", class_index)
-                continue
+                    if class_index < 0 or class_index >= len(CLASSES):
+                        logger.warning("Model returned out-of-range class index %d; skipping", class_index)
+                        continue
 
-            detections.append(
-                {
-                    "category": CLASSES[class_index],
-                    "confidence": confidence,
-                    "bounding_box": [float(v) for v in xyxy],
-                }
-            )
+                    detections.append(
+                        {
+                            "category": CLASSES[class_index],
+                            "confidence": confidence,
+                            "bounding_box": [float(v) for v in xyxy],
+                        }
+                    )
+
+            del image
+            del results
+        except Exception as exc:
+            logger.exception("Inference error in HazardDetector: %s", exc)
+        finally:
+            gc.collect()
 
         return detections
+
