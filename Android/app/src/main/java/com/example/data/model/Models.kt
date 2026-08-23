@@ -103,6 +103,8 @@ data class IncidentReportItem(
     @Json(name = "report_id") val reportId: String? = null,
     @Json(name = "incident_id") val incidentId: String? = null,
     @Json(name = "category") val category: String? = null,
+    @Json(name = "ai_category") val aiCategory: String? = null,
+    @Json(name = "ai_confidence") val aiConfidence: Double? = null,
     @Json(name = "severity") val severity: String? = "medium",
     @Json(name = "status") val status: String = "submitted",
     @Json(name = "latitude") val latitude: Double = 0.0,
@@ -111,7 +113,11 @@ data class IncidentReportItem(
     @Json(name = "description") val description: String? = null,
     @Json(name = "created_at") val createdAt: String? = null,
     @Json(name = "confirmations_count") val confirmationsCount: Int = 0
-)
+) {
+    val displayCategory: String
+        get() = category ?: aiCategory ?: "pothole"
+}
+
 
 @JsonClass(generateAdapter = true)
 data class ConfirmIncidentResponse(

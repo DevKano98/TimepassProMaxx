@@ -121,12 +121,14 @@ class ReportDetailOut(BaseModel):
     incident_id: Optional[UUID] = None
     image_url: str
     description: Optional[str] = None
+    category: Optional[str] = None
     ai_category: Optional[str] = None
     ai_confidence: Optional[float] = None
     moderation_status: str
     is_blurred: bool
     status: str
     created_at: datetime
+
 
 
 class IncidentOut(BaseModel):

@@ -282,11 +282,12 @@ private fun MyReportCard(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = HazardCategories.getDisplayName(report.category),
+                        text = HazardCategories.getDisplayName(report.displayCategory),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = report.description ?: "Civic hazard reported.",
