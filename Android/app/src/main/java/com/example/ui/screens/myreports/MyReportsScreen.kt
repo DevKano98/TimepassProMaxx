@@ -33,8 +33,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -117,7 +119,67 @@ fun MyReportsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        if (!isLoggedIn) {
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = CivicBlue)
+            }
+        } else if (uiState.reports.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (!isLoggedIn) {
+                    item {
+                        Surface(
+                            color = CivicBlueContainer.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Showing Device Reports",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = CivicBlue
+                                    )
+                                    Text(
+                                        text = "Sign in with OTP to sync across all devices",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                TextButton(onClick = onNavigateToLogin) {
+                                    Text("Sign In", fontWeight = FontWeight.Bold, color = CivicBlue)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                items(uiState.reports, key = { it.id }) { report ->
+                    MyReportCard(
+                        report = report,
+                        onClick = {
+                            val id = report.incidentId ?: report.id
+                            onNavigateToReportDetail(id)
+                        }
+                    )
+                }
+            }
+        } else if (!isLoggedIn) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -167,16 +229,7 @@ fun MyReportsScreen(
                     }
                 }
             }
-        } else if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = CivicBlue)
-            }
-        } else if (uiState.reports.isEmpty()) {
+        } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -214,27 +267,10 @@ fun MyReportsScreen(
                     )
                 }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(uiState.reports, key = { it.id }) { report ->
-                    MyReportCard(
-                        report = report,
-                        onClick = {
-                            val id = report.incidentId ?: report.id
-                            onNavigateToReportDetail(id)
-                        }
-                    )
-                }
-            }
         }
     }
 }
+
 
 @Composable
 private fun MyReportCard(

@@ -138,8 +138,30 @@ def get_nearby_incidents(
     for incident, distance in results:
         item = IncidentOut.model_validate(incident)
         item.distance_meters = distance
+
+        # Extract real coordinates from PostGIS point
+        if incident.location is not None:
+            try:
+                from geoalchemy2.shape import to_shape
+                pt = to_shape(incident.location)
+                item.longitude = pt.x
+                item.latitude = pt.y
+            except Exception:
+                pass
+
+        # Extract latest report photo if available
+        latest_rep = (
+            db.query(Report)
+            .filter(Report.incident_id == incident.id)
+            .order_by(Report.created_at.desc())
+            .first()
+        )
+        if latest_rep:
+            item.image_url = latest_rep.image_url
+
         output.append(item)
     return output
+
 
 
 @router.get("/api/reports/{report_id}", response_model=ReportDetailOut)

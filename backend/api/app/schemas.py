@@ -144,6 +144,10 @@ class IncidentOut(BaseModel):
     report_count: int
     created_at: datetime
     distance_meters: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    image_url: Optional[str] = None
+
 
 
 class IncidentAdminOut(BaseModel):
