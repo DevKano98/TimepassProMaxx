@@ -15,8 +15,11 @@ import { PredictionsPage } from './pages/dashboard/PredictionsPage';
 import { AnalyticsPage } from './pages/dashboard/AnalyticsPage';
 import { FieldAssignmentsPage } from './pages/field/FieldAssignmentsPage';
 import { UserRole } from './types';
+import { CitizenAppReplicaPage } from './pages/CitizenAppReplicaPage';
+
 
 // Route Guard: Ensures user is authenticated
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
@@ -77,8 +80,14 @@ export function App() {
           {/* Public Landing Zone */}
           <Route path="/" element={<LandingPage />} />
 
+          {/* Citizen App Interactive Replica & Simulator */}
+          <Route path="/app" element={<CitizenAppReplicaPage />} />
+          <Route path="/citizen" element={<CitizenAppReplicaPage />} />
+          <Route path="/simulator" element={<CitizenAppReplicaPage />} />
+
           {/* Government Login */}
           <Route path="/governmentdashboard" element={<LoginRoute />} />
+
 
           {/* Field Team Zone (Deliberately different mobile-first shell) */}
           <Route

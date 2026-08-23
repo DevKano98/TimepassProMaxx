@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Menu, X, ArrowRight } from 'lucide-react';
 import { Button } from '../common/Button';
 
-// Static APK download URL placeholder
-export const APK_DOWNLOAD_URL = 'REPLACE_ME';
+// Static APK download URL
+export const APK_DOWNLOAD_URL = '/civicguard.apk';
 
 interface TopNavProps {
   variant?: 'on-dark' | 'light';
@@ -15,16 +15,12 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'on-dark' }) => {
   const navigate = useNavigate();
 
   const handleDownload = () => {
-    if (APK_DOWNLOAD_URL && APK_DOWNLOAD_URL !== 'REPLACE_ME') {
-      window.open(APK_DOWNLOAD_URL, '_blank');
-    } else {
-      const el = document.getElementById('download-cta');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        alert('CivicGuard Citizen App APK build will download here.');
-      }
-    }
+    const link = document.createElement('a');
+    link.href = '/civicguard.apk';
+    link.download = 'civicguard.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const isDark = variant === 'on-dark';
@@ -54,6 +50,13 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'on-dark' }) => {
 
         {/* Center: Nav links (Desktop) */}
         <nav className="hidden md:flex items-center gap-8">
+          <Link
+            to="/app"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0052ff]/10 text-[#0052ff] font-semibold text-xs border border-[#0052ff]/20 hover:bg-[#0052ff]/20 transition-all"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0052ff] animate-pulse" />
+            <span>Try App Simulator</span>
+          </Link>
           <a
             href="#how-it-works"
             className={`type-nav-link transition-colors ${
@@ -82,10 +85,17 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'on-dark' }) => {
 
         {/* Right: CTA Button (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
+          <Link
+            to="/app"
+            className="h-10 px-4 rounded-full border border-white/20 text-white font-medium text-xs flex items-center hover:bg-white/10 transition-colors"
+          >
+            Web App
+          </Link>
           <Button variant="primary" onClick={handleDownload} className="h-10 px-5 text-[14px]">
-            Download the app
+            Download APK
           </Button>
         </div>
+
 
         {/* Mobile menu toggle */}
         <div className="flex md:hidden items-center gap-2">

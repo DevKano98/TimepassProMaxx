@@ -1,5 +1,6 @@
 import React from 'react';
-import { TopNav, APK_DOWNLOAD_URL } from '../components/layout/TopNav';
+import { Link } from 'react-router-dom';
+import { TopNav } from '../components/layout/TopNav';
 import { HeroMockupCards } from '../components/landing/HeroMockupCards';
 import { CommandCenterShowcase } from '../components/landing/CommandCenterShowcase';
 import { HowItWorks } from '../components/landing/HowItWorks';
@@ -13,17 +14,14 @@ import { Download, ArrowRight, Shield, CheckCircle, Smartphone } from 'lucide-re
 
 export const LandingPage: React.FC = () => {
   const handleDownload = () => {
-    if (APK_DOWNLOAD_URL && APK_DOWNLOAD_URL !== 'REPLACE_ME') {
-      window.open(APK_DOWNLOAD_URL, '_blank');
-    } else {
-      const el = document.getElementById('download-cta');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        alert('CivicGuard APK download initialized.');
-      }
-    }
+    const link = document.createElement('a');
+    link.href = '/civicguard.apk';
+    link.download = 'civicguard.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
 
   const handleScrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
@@ -65,17 +63,17 @@ export const LandingPage: React.FC = () => {
                 onClick={handleDownload}
                 icon={<Download className="w-5 h-5" />}
               >
-                Download for Android
+                Download APK (24MB)
               </Button>
-              <Button
-                variant="outline-on-dark"
-                onClick={handleScrollToHowItWorks}
-                icon={<ArrowRight className="w-4 h-4" />}
-                iconPosition="right"
+              <Link
+                to="/app"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm transition-all"
               >
-                See how it works
-              </Button>
+                <Smartphone className="w-4 h-4 text-primary" />
+                <span>Try App Simulator</span>
+              </Link>
             </div>
+
 
             {/* Micro proof badges */}
             <div className="flex items-center gap-6 mt-10 pt-6 border-t border-white/10 text-on-dark-soft text-[13px]">

@@ -5,12 +5,14 @@ import { Download, Sparkles } from 'lucide-react';
 
 export const CtaBand: React.FC = () => {
   const handleDownload = () => {
-    if (APK_DOWNLOAD_URL && APK_DOWNLOAD_URL !== 'REPLACE_ME') {
-      window.open(APK_DOWNLOAD_URL, '_blank');
-    } else {
-      alert('Downloading CivicGuard Citizen Android App (APK Release v1.0)...');
-    }
+    const link = document.createElement('a');
+    link.href = '/civicguard.apk';
+    link.download = 'civicguard.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
 
   return (
     <section id="download-cta" className="w-full bg-surface-dark text-on-dark py-24 px-6 border-t border-white/10 relative overflow-hidden">
