@@ -36,11 +36,9 @@ def _get_image_embedding(image_url: str) -> list[float]:
             embedding = embedding[0]
         return embedding
     except Exception as exc:
-        logger.exception("HF CLIP embedding request failed for %s", image_url)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Duplicate-detection service unavailable: {exc}",
-        ) from exc
+        logger.warning("HF CLIP embedding request skipped/failed for %s: %s", image_url, exc)
+        return []
+
 
 
 def _cosine_similarity(a: list[float], b: list[float]) -> float:

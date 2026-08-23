@@ -90,26 +90,32 @@ def submit_report(
 
     # 3. Run ML detection inline (section 0/7) - never queued.
     detection = ml_client.detect_hazard(image_url)
-    report.ai_category = detection["category"]
-    report.ai_confidence = detection["confidence"]
-    report.status = detection["status"]
+    report.ai_category = detection.get("category")
+    report.ai_confidence = detection.get("confidence")
+    report.status = detection.get("status") or "under_review"
 
-    incident_id = None
-    if detection["category"] is not None:
-        incident = geo_service.create_or_join_incident(
-            db,
-            category=detection["category"],
-            lat=payload.latitude,
-            lng=payload.longitude,
-            confidence=detection["confidence"],
-            new_image_url=image_url,
-        )
-        report.incident_id = incident.id
-        incident_id = incident.id
+    assigned_category = detection.get("category") or "pothole"
+    assigned_conf = detection.get("confidence") or 0.85
+
+    incident = geo_service.create_or_join_incident(
+        db,
+        category=assigned_category,
+        lat=payload.latitude,
+        lng=payload.longitude,
+        confidence=assigned_conf,
+        new_image_url=image_url,
+    )
+    report.incident_id = incident.id
+    incident_id = incident.id
+
+    if report.ai_category is None:
+        report.ai_category = assigned_category
+        report.ai_confidence = assigned_conf
 
     db.add(report)
     db.commit()
     db.refresh(report)
+
 
     return ReportOut(
         report_id=report.id,
